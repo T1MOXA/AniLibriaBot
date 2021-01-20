@@ -23,9 +23,18 @@ def addActiveUser(user, user_id):
     with open("users.db", "w") as config:
         conf.write(config)
 
-def getKeyByToken(users, user_token):
-    user = None
-    for key, value in users.items():
-        if value == user_token:
-            user = key
-    return user
+def getActiveReleases():
+    config = configparser.ConfigParser()
+    config.read('releases.db')
+    releaselist = {}
+    releases = config.items('active_releases')
+    for release, release_id in releases:
+        releaselist[release] = release_id
+    return releaselist
+
+def addActiveRelease(release, release_id):
+    conf = configparser.ConfigParser()
+    conf.read('releases.db')
+    conf.set('active_releases', str(release), str(release_id))
+    with open("releases.db", "w") as config:
+        conf.write(config)

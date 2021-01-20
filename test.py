@@ -1,10 +1,14 @@
 import DB_loader as cl
+import bot_funcs as f
 import random
 
 activeUsers = cl.getActiveUsers()
 newUserKey = '393313942'
 
-UserName = cl.getKeyByToken(activeUsers, newUserKey)
+string = 'deнt'
+
+
+UserName = f.getKeyByValue(activeUsers, newUserKey)
 
 print(UserName)
 
