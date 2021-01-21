@@ -1,13 +1,15 @@
 import DB_loader as cl
 import bot_funcs as f
+
 import logging
 from datetime import datetime
-from time import sleep
+import asyncio
+
 from aiogram import Bot, Dispatcher, executor, types
+
 logging.basicConfig(level=logging.INFO)
 
 token = cl.getToken()
-
 bot = Bot(token)
 dp = Dispatcher(bot)
 
@@ -45,27 +47,30 @@ async def new_release(message: types.Message):
     else:
         await message.answer("Для создания нового релиза добавьте меня в чат релиза и вызовите эту команду там.")
 
+@dp.message_handler(commands=["status"])
+async def status(message: types.Message):
+    if (int(message.chat.id) < 0):
+        releaseStatus = f.getStatus()
+        await message.answer("@" + message.from_user.username + "\n\n" + releaseStatus)
+    else:
+        releaseName = message.text.replace("/status", '').strip()
+        if (f.checkValidString(releaseName)):
+            releaseStatus = f.getStatus()
+            await message.answer(releaseStatus)
+        else:
+            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса релиза.")
+
 async def scheduler(wait_for):
     while True:
         await asyncio.sleep(wait_for)
-        #now = datetime.strftime(datetime.now(), "%X")
-        #for persid in personID:
-        #    await bot.send_message(persid, status, disable_notification=True)
-        #if (now == "23:48:30"):
-        #    for persid in personID:
-        #        await bot.send_message(persid, status, disable_notification=True)
-        break
-
-head = str.format("Статус серии {}, день {} из {}:\n", 1, 1, 4)
-subs = "✓ Субтитры (дедлайн 1/1)\n"
-decor = "✓ Оформление (дедлайн 2/3)\n"
-voice = "✓ Озвучка 4/4 (дедлайн 3/3)\n"
-timing = "✓ Тайминг (дедлайн 4/4)\n"
-fixs = "Х Фиксы 1/2 (дедлайн 4/4)\n"
-deploy = "Х Сборка (дедлайн 4/4)\n\n"
-status_tag = "#Status"
-status = head + "\n\n" + subs + decor + voice + timing + fixs + deploy + status_tag
+        now = datetime.strftime(datetime.now(), "%X")
+        if (now == "20:00:00"):
+            activeReleases = cl.getActiveReleases()
+            for Release in activeReleases:
+                releaseStatus = f.getStatus()
+                await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)
 
 if __name__ == "__main__":
-    loop.create_task(scheduler(60))
+    loop = asyncio.get_event_loop()
+    loop.create_task(scheduler(1))
     executor.start_polling(dp, skip_updates=True)
