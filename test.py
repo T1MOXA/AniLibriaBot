@@ -1,7 +1,18 @@
-import DB_loader as cl
 import bot_funcs as f
 import random
 
+
+name = "('gosick',)"
+release_id = "(-493905522,)"
+
+name = str(name).replace("(", "").replace("'", "").replace(",", "").replace(")", "").strip()
+release_id = str(release_id).replace("(", "").replace(",", "").replace(")", "").strip()
+
+print(name)
+print(release_id)
+
+
+"""
 activeUsers = cl.getActiveUsers()
 newUserKey = '393313942'
 
@@ -18,4 +29,4 @@ if UserName == None:
     print("Создан новый юзер: " + newUserName)
 else:
     print("Такой пользователь уже есть!")
-#print(activeUsers.get(newUser))
+#print(activeUsers.get(newUser))"""
