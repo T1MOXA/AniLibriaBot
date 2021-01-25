@@ -1,6 +1,7 @@
 import bot_funcs as f
 import random
-
+from datetime import datetime
+import pytz
 
 name = "('gosick',)"
 release_id = "(-493905522,)"
@@ -8,8 +9,8 @@ release_id = "(-493905522,)"
 name = str(name).replace("(", "").replace("'", "").replace(",", "").replace(")", "").strip()
 release_id = str(release_id).replace("(", "").replace(",", "").replace(")", "").strip()
 
-print(name)
-print(release_id)
+print(datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X"))
+#print(release_id)
 
 
 """

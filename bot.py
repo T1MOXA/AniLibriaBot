@@ -17,6 +17,7 @@ import bot_funcs as f
 
 import logging
 from datetime import datetime
+import pytz
 import asyncio
 from aiogram import Bot, Dispatcher, executor, types
 
@@ -82,8 +83,8 @@ async def status(message: types.Message):
 async def scheduler(wait_for):
     while True:
         await asyncio.sleep(wait_for)
-        now = datetime.strftime(datetime.now(), "%X")
-        if (now == "21:00:00"):
+        now = datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X")
+        if (now == "20:00:00"):
             activeReleases = SQLighter.get_active_releases(db)
             print(activeReleases)
             for Release in activeReleases:
