@@ -2,10 +2,12 @@ import sqlite3
 
 class SQLighter:
 
+    # Инициирование подключения к БД
     def __init__(self, database_file):
         self.connection = sqlite3.connect(database_file)
         self.cursor = self.connection.cursor()
     
+    # Получение списка (словаря) активных релизов
     def get_active_releases(self, active=True):
         with self.connection:
             names = self.cursor.execute("SELECT release_name FROM releases WHERE active = TRUE").fetchall()
@@ -20,9 +22,11 @@ class SQLighter:
                 i += 1
             return result
     
+    # Добавление нового релиза в БД
     def add_release(self, release_id, release_name, site_id="NULL"):
         with self.connection:
             return self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name) VALUES ({}, NULL, '{}')".format(str(release_id), release_name)).fetchall()
     
+    # Закрытие подключения к БД
     def close(self):
         self.connection.close()

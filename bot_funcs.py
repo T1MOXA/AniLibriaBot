@@ -1,5 +1,7 @@
 import re
 
+# Функция для проверки ключа по значению.
+# Пример: на входе список релизов типа {Test1 : 12345, Test: 23456}, и нужный ID=12345, на выходе получаем имя релиза "Test1".
 def get_key_by_value(value_list, value):
     key = None
     for current_key, current_value in value_list.items():
@@ -7,9 +9,13 @@ def get_key_by_value(value_list, value):
             key = current_key
     return key
 
+# Проверка строки на содержание кириллицы и спецсимволов, список можно расширять при необходимости
 def check_valid_string(string):
     return (not bool(re.search(r'[а-яА-ЯёЁ:"=]', string)) and bool(string) and len(string) > 3)
 
+# Формирование статуса по релизу.
+# TODO: пока что фейковые данные, нужно частично брать из БД, частично с сайта.
+# С сайта примерно так: https://api.anilibria.tv/v2/getTitle?id=8796, отсюда выдирать нужные поля (приходит в формате json)
 def get_status():
     head = str.format("Статус серии {}, день {} из {}:\n", 1, 1, 4)
     subs = "✓ Субтитры (дедлайн 1/1)\n"
@@ -21,6 +27,7 @@ def get_status():
     status = head + "\n" + subs + decor + voice + timing + fixs + status_tag
     return status
 
+# Формирование справки.
 def get_help():
     header_info = "Менеджер релизов - бот, предназначенный для контроля за работой над релизами. Он способен сообщать ответственным за релиз, что происходит задержка.\n"
     additional_info = "При добавлении бота в группу он будет ежедневно в 20:00 по МСК отправлять статусные сообщения по релизу. Последние сообщения бота можно найти по хештегу #Status."
