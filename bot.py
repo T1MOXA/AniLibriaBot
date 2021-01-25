@@ -8,7 +8,6 @@
 - config.cfg - файл конфигурации.
 - db.db - база данных со списком релизов.
 - requirements.txt - список библиотек/зависимостей проекта.
-- test.py - файл для тестирования.
 '''
 
 import config_loader as cl
