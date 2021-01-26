@@ -64,6 +64,32 @@ async def new_release(message: types.Message):
     else:
         await message.answer("Для создания нового релиза добавьте меня в чат релиза и вызовите эту команду там.")
 
+# Запуск релиза в работу.
+@dp.message_handler(commands=["start_release"])
+async def start_release(message: types.Message):
+    if (int(message.chat.id) < 0):
+        activeReleases = SQLighter.get_active_releases(db)
+        releaseToken = str(message.chat.id)
+        releaseName = f.get_key_by_value(activeReleases, releaseToken)
+        # releaseName = None - если не удалось найти имя уже созданного релиза.
+        if (releaseName != None):
+            parameters = message.text.replace("/start_release", '').strip().split(" ")
+            release_type = parameters[0]
+            deadline_offset = parameters[1]
+            current_ep = parameters[2]
+            max_ep = parameters[3]
+        else:
+            await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new_release [Release_name].")
+    else:
+        releaseName = message.text.replace("/status", '').strip()
+        if (f.check_valid_string(releaseName)):
+            activeReleases = SQLighter.get_active_releases(db)
+            release_id = activeReleases[releaseName]
+            releaseStatus = f.get_status(db, release_id)
+            await message.answer(releaseName + "\n\n" + releaseStatus)
+        else:
+            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза.")
+
 # Отображение статуса релиза
 @dp.message_handler(commands=["status"])
 async def status(message: types.Message):
@@ -85,11 +111,15 @@ async def scheduler(wait_for):
     while True:
         await asyncio.sleep(wait_for)
         now = datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X")
-        if (now == "20:00:00"):
+        if (now == "18:48:40"):
             activeReleases = SQLighter.get_active_releases(db)
             for Release in activeReleases:
-                releaseStatus = f.get_status()
+                releaseStatus = f.get_status(db, activeReleases[Release])
                 await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)
+        if (now == "18:47:40"):
+            activeReleases = SQLighter.get_active_releases(db)
+            for Release in activeReleases:
+                f.increase_day(db, activeReleases[Release])
 
 # Стартовая функция для запуска бота.
 if __name__ == "__main__":

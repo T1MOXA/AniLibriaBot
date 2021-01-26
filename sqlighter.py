@@ -27,10 +27,17 @@ class SQLighter:
             self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name) VALUES ({}, NULL, '{}')".format(str(release_id), release_name)).fetchall()
             return self.cursor.execute("INSERT INTO episodes (release_id) VALUES ({})".format(str(release_id))).fetchall()
     
+    # Получение полной информации по статусу релиза (серии)
     def get_status(self, release_id):
         with self.connection:
             return self.cursor.execute("SELECT * FROM episodes WHERE release_id={}".format(str(release_id))).fetchall()
     
+    # Изменение информации по релизу (серии)
+    def edit_release(self, release_id, new_params):
+        with self.connection:
+            return self.cursor.execute("UPDATE episodes SET top_release = {}, current_ep = {}, max_ep = {}, today = {}, deadline = {}, subs = '{}', decor = '{}', voice = '{}', timing = '{}', fixs = '{}' WHERE release_id = {};".format(
+                new_params[1], new_params[2], new_params[3], new_params[4], new_params[5], new_params[6], new_params[7], new_params[8], new_params[9], new_params[10], release_id)).fetchall()
+
     # Закрытие подключения к БД
     def close(self):
         self.connection.close()
