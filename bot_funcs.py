@@ -1,4 +1,5 @@
 import re
+from sqlighter import SQLighter
 
 # Функция для проверки ключа по значению.
 # Пример: на входе список релизов типа {Test1 : 12345, Test: 23456}, и нужный ID=12345, на выходе получаем имя релиза "Test1".
@@ -11,21 +12,48 @@ def get_key_by_value(value_list, value):
 
 # Проверка строки на содержание кириллицы и спецсимволов, список можно расширять при необходимости
 def check_valid_string(string):
-    return (not bool(re.search(r'[а-яА-ЯёЁ:"=]', string)) and bool(string) and len(string) > 3)
+    return (not bool(re.search(r'[а-яА-ЯёЁ"={}\[\]]', string)) and bool(string) and len(string) > 3)
 
 # Формирование статуса по релизу.
 # TODO: пока что фейковые данные, нужно частично брать из БД, частично с сайта.
 # С сайта примерно так: https://api.anilibria.tv/v2/getTitle?id=8796, отсюда выдирать нужные поля (приходит в формате json)
-def get_status():
-    head = str.format("Статус серии {}, день {} из {}:\n", 1, 1, 4)
-    subs = "✓ Субтитры (дедлайн 1/1)\n"
-    decor = "✓ Оформление (дедлайн 2/3)\n"
-    voice = "✓ Озвучка 4/4 (дедлайн 3/3)\n"
-    timing = "✓ Тайминг (дедлайн 4/4)\n"
-    fixs = "Х Фиксы 1/2 (дедлайн 4/4)\n\n"
-    status_tag = "#Status"
+def get_status(db, release_id):
+    status_from_db = str(SQLighter.get_status(db, release_id)[0]).replace("(", "").replace(")", "").split(", ")
+    top = status_from_db[1]
+    episode = status_from_db[2]
+    max_episode = status_from_db[3]
+    if max_episode == "None":
+        max_episode = "?"
+    today = status_from_db[4]
+    if (bool(status_from_db[5])):
+        deadline = 2
+    else:
+        deadline = 4
+    
+    subs = step_status(status_from_db[6], "s")
+    decor = step_status(status_from_db[7], "d")
+    voice = step_status(status_from_db[8], "v")
+    timing = step_status(status_from_db[9], "t")
+    fixs = step_status(status_from_db[10], "f")
+
+
+    head = str.format("Серия {} из {}. День {} из {}:\n", episode, max_episode, today, deadline)
+    status_tag = "\n#Status"
     status = head + "\n" + subs + decor + voice + timing + fixs + status_tag
-    return status
+    
+    return str(status)
+
+def step_status(data, mod):
+    step_info = data.replace("'", "").split("|")
+    mod_list = {
+        's': "Субтитры",
+        'd': "Оформление",
+        'v': "Озвучка",
+        't': "Тайминг",
+        'f': "Фиксы"
+    }
+    return "{} {} (дедлайн {}/{})\n".format("Х" if step_info[0]=="0" else "✓", mod_list[mod], step_info[1], step_info[2])
+
 
 # Формирование справки.
 def get_help():

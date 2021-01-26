@@ -68,15 +68,17 @@ async def new_release(message: types.Message):
 @dp.message_handler(commands=["status"])
 async def status(message: types.Message):
     if (int(message.chat.id) < 0):
-        releaseStatus = f.get_status()
+        releaseStatus = f.get_status(db, message.chat.id)
         await message.answer("@" + message.from_user.username + "\n\n" + releaseStatus)
     else:
         releaseName = message.text.replace("/status", '').strip()
         if (f.check_valid_string(releaseName)):
-            releaseStatus = f.get_status()
+            activeReleases = SQLighter.get_active_releases(db)
+            release_id = activeReleases[releaseName]
+            releaseStatus = f.get_status(db, release_id)
             await message.answer(releaseName + "\n\n" + releaseStatus)
         else:
-            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса релиза.")
+            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза.")
 
 # Функция (шедулер) для ежедневной отправки статуса по активным релизам. Активна постоянно, проверятся раз в секунду.
 async def scheduler(wait_for):
@@ -85,7 +87,6 @@ async def scheduler(wait_for):
         now = datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X")
         if (now == "20:00:00"):
             activeReleases = SQLighter.get_active_releases(db)
-            print(activeReleases)
             for Release in activeReleases:
                 releaseStatus = f.get_status()
                 await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)

@@ -12,7 +12,6 @@ class SQLighter:
         with self.connection:
             names = self.cursor.execute("SELECT release_name FROM releases WHERE active = TRUE").fetchall()
             ids = self.cursor.execute("SELECT release_id FROM releases WHERE active = TRUE").fetchall()
-            print(ids)
             result = {}
             i = 0
             while (i < len(names)):
@@ -25,7 +24,12 @@ class SQLighter:
     # Добавление нового релиза в БД
     def add_release(self, release_id, release_name, site_id="NULL"):
         with self.connection:
-            return self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name) VALUES ({}, NULL, '{}')".format(str(release_id), release_name)).fetchall()
+            self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name) VALUES ({}, NULL, '{}')".format(str(release_id), release_name)).fetchall()
+            return self.cursor.execute("INSERT INTO episodes (release_id) VALUES ({})".format(str(release_id))).fetchall()
+    
+    def get_status(self, release_id):
+        with self.connection:
+            return self.cursor.execute("SELECT * FROM episodes WHERE release_id={}".format(str(release_id))).fetchall()
     
     # Закрытие подключения к БД
     def close(self):
