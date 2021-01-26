@@ -62,7 +62,7 @@ async def new_release(message: types.Message):
                 else:
                     await message.answer("Имя релиза не может содержать кириллицу или специальные символы. Введите имя релиза через пробел после команды /new_release.")
     else:
-        await message.answer("Для создания нового релиза добавьте меня в чат релиза и вызовите эту команду там.")
+        await message.answer("Для создания нового релиза добавьте бота в чат релиза и вызовите эту команду там.")
 
 # Запуск релиза в работу.
 @dp.message_handler(commands=["start_release"])
@@ -81,14 +81,7 @@ async def start_release(message: types.Message):
         else:
             await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new_release [Release_name].")
     else:
-        releaseName = message.text.replace("/status", '').strip()
-        if (f.check_valid_string(releaseName)):
-            activeReleases = SQLighter.get_active_releases(db)
-            release_id = activeReleases[releaseName]
-            releaseStatus = f.get_status(db, release_id)
-            await message.answer(releaseName + "\n\n" + releaseStatus)
-        else:
-            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза.")
+        await message.answer("Для старта релиза добавьте бота в чат релиза и вызовите эту команду там.")
 
 # Отображение статуса релиза
 @dp.message_handler(commands=["status"])

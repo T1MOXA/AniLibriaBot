@@ -82,6 +82,7 @@ def get_help():
     additional_info = "При добавлении бота в группу он будет ежедневно в 20:00 по МСК отправлять статусные сообщения по релизу. Последние сообщения бота можно найти по хештегу #Status."
     command_new_release = "/new_release [Release_name] - Создание нового релиза. Можно вызвать только в группе релиза после добавления туда бота. Название релиза только на английском языке. Если не указать название релиза - бот попытается взять имя группы.\n\n"
     command_status = "/status [Release_name] - Вызов статуса релиза. В группах работает без названия релиза, а в личных сообщениях - только с названием (название должно соответствовать заданому при создании релиза).\n\n"
-    command_start_release = "/start_release"
-    help_info = header_info + additional_info + "\n\nСписок доступных команд:\n" + command_new_release + command_status + command_start_release
+    command_start_release = "/start_release [Release_type]* [Deadline_offset] [Current_ep] [Max_ep] - Команда для начала работы над релизом. Можно вызвать только в группе релиза.\nПараметры:\n• Тип релиза* (Top, NonTop, Old)\n• Смещение дня релиза (если совпадает с дедлайном - значит 0).\n• Текущий эпизод (если бот был добавлен не сразу)\n• Всего эпизодов (если известно).\n\n"
+    bottom = "* - звёздочкой отмечены обязательные параметры."
+    help_info = header_info + additional_info + "\n\nСписок доступных команд:\n" + command_new_release + command_status + command_start_release + bottom
     return help_info
