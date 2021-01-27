@@ -26,7 +26,7 @@ def increase_day(db, release_id):
     status_from_db[8] = step_add_day(status_from_db[8])
     status_from_db[9] = step_add_day(status_from_db[9])
     status_from_db[10] = step_add_day(status_from_db[10])
-    SQLighter.edit_release(db, release_id, status_from_db)
+    SQLighter.edit_episodes_info(db, release_id, status_from_db)
 
 # Формирование статуса по релизу.
 # TODO: пока что фейковые данные, нужно частично брать из БД, частично с сайта.
@@ -35,7 +35,7 @@ def get_status(db, release_id):
     try:
         test_avaible = SQLighter.get_status(db, release_id)[0]
     except:
-        return "Релиз не найден. Возможно, он уже закрыт или ещё не создан. Обратитесь с администратору бота."
+        return "Релиз не найден. Возможно, он уже закрыт или ещё не стартован. Обратитесь с администратору бота."
     status_from_db = str(SQLighter.get_status(db, release_id)[0]).replace("(", "").replace(")", "").split(", ")
     top = status_from_db[1]
     episode = status_from_db[2]
@@ -57,6 +57,7 @@ def get_status(db, release_id):
 
     return str(status)
 
+# Функция для подготовки статуса по каждому этапу
 def step_status(data, mod):
     step_info = data.replace("'", "").split("|")
     mod_list = {
@@ -68,6 +69,7 @@ def step_status(data, mod):
     }
     return "{} {} (дедлайн {}/{})\n".format("❌" if step_info[0]=="0" else "✅", mod_list[mod], step_info[1], step_info[2])
 
+# Функция для обновления в статусе текущего дня (срабатывает в 00:00)
 def step_add_day(data):
     step_info = data.replace("'", "").split("|")
     if step_info[0]=="0":
@@ -75,6 +77,18 @@ def step_add_day(data):
     else:
         day = int(step_info[1])
     return "{}|{}|{}".format(step_info[0], str(day), step_info[2])
+
+# Функция для определния дедлайна релиза в зависимости от типа (топ, нетоп, неонгоинг)
+def set_release_type(release_type):
+    release_type_info = {
+        'top': 2,
+        'nontop': 4,
+        'old': 7
+    }
+    try:
+        return release_type_info[release_type]
+    except:
+        return 0
 
 # Формирование справки.
 def get_help():

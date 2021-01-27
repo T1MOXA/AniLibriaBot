@@ -30,7 +30,7 @@ db = SQLighter(cl.get_DB())
 # Запускается при первом запуске бота в ЛС.
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
-    await message.answer("Привет, " + message.from_user.username + "!\nЯ бот, созданный для контроля за релизами. Для получения информации по моей настройке напиши /help.")
+    await message.answer("Привет, " + message.from_user.username + ".\nЯ менеджер релизов - бот, созданный для контроля за релизами. Для получения информации по моей настройке наберите /help.")
 
 # Вывод справки. Содержит описание и список доступных команд.
 @dp.message_handler(commands=["help"])
@@ -49,7 +49,7 @@ async def new_release(message: types.Message):
         if (releaseName != None):
             await message.answer("Для этого чата релиза уже создан релиз \"" + releaseName + "\".")
         else:
-            releaseName = message.text.replace("/new_release", '').strip()
+            releaseName = message.text.replace("/new_release", '').replace("@AL_RM_Bot", "").strip()
             if (f.check_valid_string(releaseName)):
                 # Релиз создаётся в БД через sqlighter.py
                 SQLighter.add_release(db, message.chat.id, releaseName)
@@ -73,11 +73,13 @@ async def start_release(message: types.Message):
         releaseName = f.get_key_by_value(activeReleases, releaseToken)
         # releaseName = None - если не удалось найти имя уже созданного релиза.
         if (releaseName != None):
-            parameters = message.text.replace("/start_release", '').strip().split(" ")
-            release_type = parameters[0]
-            deadline_offset = parameters[1]
-            current_ep = parameters[2]
-            max_ep = parameters[3]
+            parameters = message.text.replace("/start_release", '').replace("@AL_RM_Bot", "").strip().split(" ")
+            parameters[0] = f.set_release_type(parameters[0].lower())
+            if (parameters[0] > 0 and len(parameters) < 5):
+                SQLighter.add_episodes_info(db, message.chat.id, parameters)
+                await message.answer("Релиз запущен в работу. Текущее состояние релиза можно узнать командой /status.")
+            else:
+                message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help.")
         else:
             await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new_release [Release_name].")
     else:
@@ -90,7 +92,7 @@ async def status(message: types.Message):
         releaseStatus = f.get_status(db, message.chat.id)
         await message.answer("@" + message.from_user.username + "\n\n" + releaseStatus)
     else:
-        releaseName = message.text.replace("/status", '').strip()
+        releaseName = message.text.replace("/status", '').replace("@AL_RM_Bot", "").strip()
         if (f.check_valid_string(releaseName)):
             activeReleases = SQLighter.get_active_releases(db)
             release_id = activeReleases[releaseName]
