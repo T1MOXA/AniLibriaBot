@@ -49,15 +49,22 @@ async def new_release(message: types.Message):
         if (releaseName != None):
             await message.answer("Для этого чата релиза уже создан релиз \"" + releaseName + "\".")
         else:
-            releaseName = message.text.replace("/new_release", '').replace("@AL_RM_Bot", "").strip()
-            if (f.check_valid_string(releaseName)):
+            releaseName = message.text.replace("/new_release", '').replace("@AL_RM_Bot", "").strip().split(" ")
+            if (f.check_valid_string(releaseName[0])):
                 # Релиз создаётся в БД через sqlighter.py
-                SQLighter.add_release(db, message.chat.id, releaseName)
-                await message.answer("Создан новый релиз \"" + releaseName + "\".")
+                i = 0
+                description = ''
+                while (i< len(releaseName)):
+                    if (not i == 0):
+                        description += releaseName[i] + " "
+                    i += 1
+                description.strip()
+                SQLighter.add_release(db, message.chat.id, releaseName[0].lower(), description)
+                await message.answer("Создан новый релиз \"" + releaseName[0].lower() + "\".")
             else:
                 if (f.check_valid_string(message.chat.title)):
-                    # Релиз создаётся в БД через sqlighter.py
-                    SQLighter.add_release(db, message.chat.id, message.chat.title)
+                    # Берём название конференции как название релиза
+                    SQLighter.add_release(db, message.chat.id, str(message.chat.title).lower(), '')
                     await message.answer("Создан новый релиз \"" + message.chat.title + "\".")
                 else:
                     await message.answer("Имя релиза не может содержать кириллицу или специальные символы. Введите имя релиза через пробел после команды /new_release.")
@@ -95,11 +102,33 @@ async def status(message: types.Message):
         releaseName = message.text.replace("/status", '').replace("@AL_RM_Bot", "").strip()
         if (f.check_valid_string(releaseName)):
             activeReleases = SQLighter.get_active_releases(db)
-            release_id = activeReleases[releaseName]
-            releaseStatus = f.get_status(db, release_id)
-            await message.answer(releaseName + "\n\n" + releaseStatus)
+            try:
+                release_id = activeReleases[releaseName.lower()]
+                releaseStatus = f.get_status(db, release_id)
+                await message.answer(releaseName.lower() + "\n\n" + releaseStatus)
+            except:
+                await message.answer("Релиз \"" + releaseName + "\" не найден. Проверьте правильность написания названия релиза. Список активных релизов можно посмотреть командой /active_releases.")
         else:
             await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза.")
+
+# Список активных релизов
+@dp.message_handler(commands=["active_releases"])
+async def get_active_releases_list(message: types.Message):
+    if (int(message.chat.id) < 0):
+        await message.answer("Данная команда работает только в личных сообщениях.")
+    else:
+        activeReleases = SQLighter.get_active_releases(db)
+        description = SQLighter.get_description(db)
+        releaseList = 'Список активных релизов:\n'
+        i = 0
+        for release in activeReleases:
+            i += 1
+            desc = str(description[i-1]).replace("(", "").replace(")", "").replace("'", "")[:-1]
+            if (desc != "None"):
+                releaseList += str(i) + ". " + release + " - " + desc.strip() + "\n"
+            else:
+                releaseList += str(i) + ". " + release + "\n"
+        await message.answer(releaseList)
 
 # Функция (шедулер) для ежедневной отправки статуса по активным релизам. Активна постоянно, проверятся раз в секунду.
 async def scheduler(wait_for):

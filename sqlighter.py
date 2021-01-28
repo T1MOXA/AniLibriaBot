@@ -21,10 +21,15 @@ class SQLighter:
                 i += 1
             return result
     
-    # Добавление нового релиза в БД
-    def add_release(self, release_id, release_name, site_id="NULL"):
+    # Получение описаний к релизам
+    def get_description(self):
         with self.connection:
-            self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name) VALUES ({}, NULL, '{}')".format(str(release_id), release_name)).fetchall()
+            return self.cursor.execute("SELECT description FROM releases WHERE active = TRUE").fetchall()
+
+    # Добавление нового релиза в БД
+    def add_release(self, release_id, release_name, description, site_id="NULL"):
+        with self.connection:
+            self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name, description) VALUES ({}, NULL, '{}', '{}')".format(str(release_id), release_name, description)).fetchall()
             return 
     
     # Получение полной информации по статусу релиза (серии)
