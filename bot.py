@@ -109,7 +109,7 @@ async def status(message: types.Message):
             except:
                 await message.answer("Релиз \"" + releaseName + "\" не найден. Проверьте правильность написания названия релиза. Список активных релизов можно посмотреть командой /active_releases.")
         else:
-            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза.")
+            await message.answer("@" + message.from_user.username + ", введите название релиза после команды /status для просмотра статуса или введите эту команду в чат релиза. Список активных релизов можно посмотреть командой /active_releases.")
 
 # Список активных релизов
 @dp.message_handler(commands=["active_releases"])
@@ -128,6 +128,7 @@ async def get_active_releases_list(message: types.Message):
                 releaseList += str(i) + ". " + release + " - " + desc.strip() + "\n"
             else:
                 releaseList += str(i) + ". " + release + "\n"
+        releaseList += "\nДля вызова статуса релиза наберите \"/status [Release_name]\", где Release_name - название релиза из списка."
         await message.answer(releaseList)
 
 # Функция (шедулер) для ежедневной отправки статуса по активным релизам. Активна постоянно, проверятся раз в секунду.
