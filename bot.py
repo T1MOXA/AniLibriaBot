@@ -135,12 +135,12 @@ async def scheduler(wait_for):
     while True:
         await asyncio.sleep(wait_for)
         now = datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X")
-        if (now == "18:48:40"):
+        if (now == "20:00:00"):
             activeReleases = SQLighter.get_active_releases(db)
             for Release in activeReleases:
                 releaseStatus = f.get_status(db, activeReleases[Release])
                 await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)
-        if (now == "18:47:40"):
+        if (now == "00:00:00"):
             activeReleases = SQLighter.get_active_releases(db)
             for Release in activeReleases:
                 f.increase_day(db, activeReleases[Release])
