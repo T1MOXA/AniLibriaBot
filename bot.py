@@ -35,14 +35,17 @@ async def start(message: types.Message):
 # Вывод справки. Содержит описание и список доступных команд.
 @dp.message_handler(commands=["help"])
 async def help(message: types.Message):
-    await message.answer(f.get_help())
+    if (int(message.chat.id) > 0):
+        await message.answer(f.get_help())
+    else:
+        await message.answer("Справка работает только в личных сообщениях.")
 
 # Создание нового релиза.
 @dp.message_handler(commands=["new_release"])
 async def new_release(message: types.Message):
     # message.chat.id < 0 (отрицательный ID) в том случае, если сообщение пришло из чата. Если больше нуля - это ЛС.
     if (int(message.chat.id) < 0):
-        activeReleases = SQLighter.get_active_releases(db)
+        activeReleases = SQLighter.get_all_releases(db)
         releaseToken = str(message.chat.id)
         releaseName = f.get_key_by_value(activeReleases, releaseToken)
         # releaseName = None - если не удалось найти имя уже созданного релиза.
@@ -75,33 +78,114 @@ async def new_release(message: types.Message):
 @dp.message_handler(commands=["start_release"])
 async def start_release(message: types.Message):
     if (int(message.chat.id) < 0):
-        activeReleases = SQLighter.get_active_releases(db)
+        activeReleases = SQLighter.get_all_releases(db)
         releaseToken = str(message.chat.id)
         releaseName = f.get_key_by_value(activeReleases, releaseToken)
         # releaseName = None - если не удалось найти имя уже созданного релиза.
         if (releaseName != None):
             parameters = message.text.replace("/start_release", '').replace("@AL_RM_Bot", "").strip().split(" ")
+            # Нулевой параметр - тип релиза (топ, нетоп, неонгоинг). Регистр не важен, тут его приводим к нижнему.
             parameters[0] = f.set_release_type(parameters[0].lower())
+            # Принимаем от 1 до 4 параметров.
             if (parameters[0] > 0 and len(parameters) < 5):
                 SQLighter.add_episodes_info(db, message.chat.id, parameters)
                 await message.answer("Релиз запущен в работу. Текущее состояние релиза можно узнать командой /status.")
             else:
-                message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help.")
+                await message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help.")
         else:
             await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new_release [Release_name].")
     else:
         await message.answer("Для старта релиза добавьте бота в чат релиза и вызовите эту команду там.")
+
+# Блок работы над релизом.
+@dp.message_handler(commands=["subs_completed"])
+async def subs_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        if (not f.check_step_completed(db, message.chat.id, 's')):
+            answer = "Работа над субтитрами завершена.\n"
+            answer += f.step_completing(db, message.chat.id, 's')
+        else:
+            answer = "Работа над субтитрами завершена ранее. Текущее состояние релиза можно узнать командой /status."
+        await message.answer(answer)
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
+
+@dp.message_handler(commands=["decor_completed"])
+async def decor_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        if (not f.check_step_completed(db, message.chat.id, 'd')):
+            answer = "Работа над оформлением завершена.\n"
+            answer += f.step_completing(db, message.chat.id, 'd')
+        else:
+            answer = "Работа над оформлением завершена ранее. Текущее состояние релиза можно узнать командой /status."
+        await message.answer(answer)
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
+
+@dp.message_handler(commands=["voice_completed"])
+async def voice_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        if (not f.check_step_completed(db, message.chat.id, 'v')):
+            answer = "Работа над озвучкой завершена.\n"
+            answer += f.step_completing(db, message.chat.id, 'v')
+        else:
+            answer = "Работа над озвучкой завершена ранее. Текущее состояние релиза можно узнать командой /status."
+        await message.answer(answer)
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
+
+@dp.message_handler(commands=["timing_completed"])
+async def timing_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        if (not f.check_step_completed(db, message.chat.id, 't')):
+            answer = "Работа над таймингом завершена.\n"
+            answer += f.step_completing(db, message.chat.id, 't')
+        else:
+            answer = "Работа над таймингом завершена ранее. Текущее состояние релиза можно узнать командой /status."
+        await message.answer(answer)
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
+
+@dp.message_handler(commands=["fixs_completed"])
+async def fixs_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        if (not f.check_step_completed(db, message.chat.id, 'f')):
+            answer = "Работа над фиксами завершена.\n"
+            answer += f.step_completing(db, message.chat.id, 'f')
+        else:
+            answer = "Работа над фиксами завершена ранее. Текущее состояние релиза можно узнать командой /status."
+        await message.answer(answer)
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
+
+# Завершение работы над серией
+@dp.message_handler(commands=["ep_completed"])
+async def ep_completed(message: types.Message):
+    if (int(message.chat.id) < 0):
+        # Проверка, что завершены все этапы работы
+        if (f.check_step_completed(db, message.chat.id, 's') and 
+            f.check_step_completed(db, message.chat.id, 'd') and 
+            f.check_step_completed(db, message.chat.id, 'v') and
+            f.check_step_completed(db, message.chat.id, 't') and
+            f.check_step_completed(db, message.chat.id, 'f')):
+            releaseStatus = f.get_status(db, message.chat.id)
+            ep_completed_title = f.ep_completed(db, message.chat.id)
+            await message.answer(str(ep_completed_title) + str(releaseStatus))
+        else:
+            await message.answer("Завершены не все этапы работы над серией.\nТекущее состояние релиза можно узнать командой /status.")
+    else:
+        await message.answer("Данная команда работает только в чате релиза.")
 
 # Отображение статуса релиза
 @dp.message_handler(commands=["status"])
 async def status(message: types.Message):
     if (int(message.chat.id) < 0):
         releaseStatus = f.get_status(db, message.chat.id)
-        await message.answer("@" + message.from_user.username + "\n\n" + releaseStatus)
+        await message.answer(releaseStatus)
     else:
         releaseName = message.text.replace("/status", '').replace("@AL_RM_Bot", "").strip()
         if (f.check_valid_string(releaseName)):
-            activeReleases = SQLighter.get_active_releases(db)
+            activeReleases = SQLighter.get_all_releases(db, all_releases=True)
             try:
                 release_id = activeReleases[releaseName.lower()]
                 releaseStatus = f.get_status(db, release_id)
@@ -117,7 +201,7 @@ async def get_active_releases_list(message: types.Message):
     if (int(message.chat.id) < 0):
         await message.answer("Данная команда работает только в личных сообщениях.")
     else:
-        activeReleases = SQLighter.get_active_releases(db)
+        activeReleases = SQLighter.get_all_releases(db)
         description = SQLighter.get_description(db)
         releaseList = 'Список активных релизов:\n'
         i = 0
@@ -131,18 +215,37 @@ async def get_active_releases_list(message: types.Message):
         releaseList += "\nДля вызова статуса релиза наберите \"/status [Release_name]\", где Release_name - название релиза из списка."
         await message.answer(releaseList)
 
+# Список старых релизов
+@dp.message_handler(commands=["releases_history"])
+async def get_active_releases_list(message: types.Message):
+    if (int(message.chat.id) < 0):
+        await message.answer("Данная команда работает только в личных сообщениях.")
+    else:
+        allReleases = SQLighter.get_all_releases(db, active=False)
+        description = SQLighter.get_description(db, active=False)
+        releaseList = 'Список старых релизов:\n'
+        i = 0
+        for release in allReleases:
+            i += 1
+            desc = str(description[i-1]).replace("(", "").replace(")", "").replace("'", "")[:-1]
+            if (desc != "None"):
+                releaseList += str(i) + ". " + release + " - " + desc.strip() + "\n"
+            else:
+                releaseList += str(i) + ". " + release + "\n"
+        await message.answer(releaseList)
+
 # Функция (шедулер) для ежедневной отправки статуса по активным релизам. Активна постоянно, проверятся раз в секунду.
 async def scheduler(wait_for):
     while True:
         await asyncio.sleep(wait_for)
         now = datetime.strftime(datetime.now(pytz.timezone('Europe/Moscow')), "%X")
         if (now == "20:00:00"):
-            activeReleases = SQLighter.get_active_releases(db)
+            activeReleases = SQLighter.get_all_releases(db)
             for Release in activeReleases:
                 releaseStatus = f.get_status(db, activeReleases[Release])
                 await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)
         if (now == "00:00:00"):
-            activeReleases = SQLighter.get_active_releases(db)
+            activeReleases = SQLighter.get_all_releases(db)
             for Release in activeReleases:
                 f.increase_day(db, activeReleases[Release])
 

@@ -7,11 +7,20 @@ class SQLighter:
         self.connection = sqlite3.connect(database_file)
         self.cursor = self.connection.cursor()
     
-    # Получение списка (словаря) активных релизов
-    def get_active_releases(self, active=True):
+    # Получение списка (словаря) релизов. По умолчанию берутся только активные релизы
+    def get_all_releases(self, active=True, all_releases=False):
         with self.connection:
-            names = self.cursor.execute("SELECT release_name FROM releases WHERE active = TRUE").fetchall()
-            ids = self.cursor.execute("SELECT release_id FROM releases WHERE active = TRUE").fetchall()
+            additional_info = ''
+            if active:
+                additional_info = " WHERE active = TRUE"
+            else:
+                additional_info = " WHERE active = FALSE"
+            
+            if all_releases:
+                additional_info = ''
+
+            names = self.cursor.execute("SELECT release_name FROM releases{}".format(additional_info)).fetchall()
+            ids = self.cursor.execute("SELECT release_id FROM releases{}".format(additional_info)).fetchall()
             result = {}
             i = 0
             while (i < len(names)):
@@ -20,11 +29,19 @@ class SQLighter:
                 result[name] = release_id
                 i += 1
             return result
-    
+
     # Получение описаний к релизам
-    def get_description(self):
+    def get_description(self, active=True, all_releases=False):
         with self.connection:
-            return self.cursor.execute("SELECT description FROM releases WHERE active = TRUE").fetchall()
+            additional_info = ''
+            if active:
+                additional_info = " WHERE active = TRUE"
+            else:
+                additional_info = " WHERE active = FALSE"
+            
+            if all_releases:
+                additional_info = ''
+            return self.cursor.execute("SELECT description FROM releases{}".format(additional_info)).fetchall()
 
     # Добавление нового релиза в БД
     def add_release(self, release_id, release_name, description, site_id="NULL"):
@@ -36,6 +53,11 @@ class SQLighter:
     def get_status(self, release_id):
         with self.connection:
             return self.cursor.execute("SELECT * FROM episodes WHERE release_id={}".format(str(release_id))).fetchall()
+    
+    # Получение информации об активности релиза
+    def get_active_status(self, release_id):
+        with self.connection:
+            return self.cursor.execute("SELECT active FROM releases WHERE release_id={}".format(str(release_id))).fetchall()
     
     # Старт релиза, добавление новой серии на отслеживание
     def add_episodes_info(self, release_id, parameters):
@@ -53,7 +75,7 @@ class SQLighter:
                 today += int(parameters[1])
                 current_ep = parameters[2]
                 additional_params_column = ", today, current_ep"
-                additional_params = ", {}, {}, {}".format(today, current_ep)
+                additional_params = ", {}, {}".format(today, current_ep)
             if (len(parameters) == 2):
                 today += int(parameters[1])
                 additional_params_column = ", today"
@@ -77,6 +99,11 @@ class SQLighter:
         with self.connection:
             return self.cursor.execute("UPDATE episodes SET top_release = {}, current_ep = {}, max_ep = {}, today = {}, deadline = {}, subs = '{}', decor = '{}', voice = '{}', timing = '{}', fixs = '{}' WHERE release_id = {};".format(
                 new_params[1], new_params[2], new_params[3], new_params[4], new_params[5], new_params[6], new_params[7], new_params[8], new_params[9], new_params[10], release_id)).fetchall()
+
+    # Установка релиза неактивным
+    def set_not_active_release(self, release_id):
+        with self.connection:
+            return ""
 
     # Закрытие подключения к БД
     def close(self):
