@@ -19,7 +19,7 @@ class SQLighter:
             if all_releases:
                 additional_info = ''
 
-            names = self.cursor.execute("SELECT release_name FROM releases{}".format(additional_info)).fetchall()
+            names = self.cursor.execute("SELECT release_short_name FROM releases{}".format(additional_info)).fetchall()
             ids = self.cursor.execute("SELECT release_id FROM releases{}".format(additional_info)).fetchall()
             result = {}
             i = 0
@@ -31,7 +31,7 @@ class SQLighter:
             return result
 
     # Получение описаний к релизам
-    def get_description(self, active=True, all_releases=False):
+    def get_release_long_name(self, active=True, all_releases=False):
         with self.connection:
             additional_info = ''
             if active:
@@ -41,12 +41,12 @@ class SQLighter:
             
             if all_releases:
                 additional_info = ''
-            return self.cursor.execute("SELECT description FROM releases{}".format(additional_info)).fetchall()
+            return self.cursor.execute("SELECT release_long_name FROM releases{}".format(additional_info)).fetchall()
 
     # Добавление нового релиза в БД
-    def add_release(self, release_id, release_name, description, site_id="NULL"):
+    def add_release(self, release_id, release_short_name, release_long_name, site_id="NULL"):
         with self.connection:
-            self.cursor.execute("INSERT INTO releases (release_id, site_id, release_name, description) VALUES ({}, NULL, '{}', '{}')".format(str(release_id), release_name, description)).fetchall()
+            self.cursor.execute("INSERT INTO releases (release_id, site_id, release_short_name, release_long_name) VALUES ({}, NULL, '{}', '{}')".format(str(release_id), release_short_name, release_long_name)).fetchall()
             return 
     
     # Получение полной информации по статусу релиза (серии)
@@ -66,18 +66,18 @@ class SQLighter:
             additional_params = ""
             today = 0
             if (len(parameters) == 4):
-                today += int(parameters[1])
+                today = int(parameters[1])
                 current_ep = parameters[2]
                 max_ep = parameters[3]
                 additional_params_column = ", today, current_ep, max_ep"
                 additional_params = ", {}, {}, {}".format(today, current_ep, max_ep)
             if (len(parameters) == 3):
-                today += int(parameters[1])
+                today = int(parameters[1])
                 current_ep = parameters[2]
                 additional_params_column = ", today, current_ep"
                 additional_params = ", {}, {}".format(today, current_ep)
             if (len(parameters) == 2):
-                today += int(parameters[1])
+                today = int(parameters[1])
                 additional_params_column = ", today"
                 additional_params = ", " + str(today)
             deadline = parameters[0]
