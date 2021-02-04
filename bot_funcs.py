@@ -58,6 +58,11 @@ def increase_day(db, release_id):
         status_from_db[10] = step_change_day(status_from_db[10])
         SQLighter.edit_episodes_info(db, release_id, status_from_db)
 
+# Получение полного имени релиза по ИД
+def get_long_name(db, release_id):
+    name_from_db = SQLighter.get_release_long_name_by_id(db, release_id)
+    return str(name_from_db[0]).replace("(", "").replace(")", "").replace(",", "").replace("'", "").strip()
+
 # Формирование статуса по релизу.
 # TODO: Можно частично брать инфу о релизе с сайта.
 # С сайта примерно так: https://api.anilibria.tv/v2/getTitle?id=8796, отсюда выдирать нужные поля (приходит в формате json)

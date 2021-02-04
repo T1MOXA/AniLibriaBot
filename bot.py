@@ -186,8 +186,11 @@ async def status(message: types.Message):
             activeReleases = SQLighter.get_all_releases(db, all_releases=True)
             try:
                 release_id = activeReleases[releaseName.lower()]
+                longName = f.get_long_name(db, release_id)
+                if (longName == ""):
+                    longName = releaseName.lower()
                 releaseStatus = f.get_status(db, release_id)
-                await message.answer(releaseName.lower() + "\n\n" + releaseStatus)
+                await message.answer(longName + "\n\n" + releaseStatus)
             except:
                 await message.answer("Релиз \"" + releaseName + "\" не найден. Проверьте правильность написания названия релиза. Список активных релизов можно посмотреть командой /active_releases в личных сообщениях.")
         else:
@@ -200,7 +203,7 @@ async def get_active_releases_list(message: types.Message):
         await message.answer("Данная команда работает только в личных сообщениях.")
     else:
         activeReleases = SQLighter.get_all_releases(db)
-        release_long_name = SQLighter.get_release_long_name(db)
+        release_long_name = SQLighter.get_releases_long_names(db)
         releaseList = 'Список активных релизов:\n'
         i = 0
         for release in activeReleases:
@@ -220,7 +223,7 @@ async def get_active_releases_list(message: types.Message):
         await message.answer("Данная команда работает только в личных сообщениях.")
     else:
         allReleases = SQLighter.get_all_releases(db, active=False)
-        release_long_name = SQLighter.get_release_long_name(db, active=False)
+        release_long_name = SQLighter.get_releases_long_names(db, active=False)
         releaseList = 'Список старых релизов:\n'
         i = 0
         for release in allReleases:
@@ -241,7 +244,8 @@ async def scheduler(wait_for):
             activeReleases = SQLighter.get_all_releases(db)
             for Release in activeReleases:
                 releaseStatus = f.get_status(db, activeReleases[Release])
-                await bot.send_message(activeReleases[Release], Release + "\n\n" + releaseStatus, disable_notification=True)
+                releaseLongName = f.get_long_name(db, activeReleases[Release])
+                await bot.send_message(activeReleases[Release], releaseLongName + "\n\n" + releaseStatus, disable_notification=True)
         if (now == "00:00:00"):
             activeReleases = SQLighter.get_all_releases(db)
             for Release in activeReleases:

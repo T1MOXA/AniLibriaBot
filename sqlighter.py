@@ -30,8 +30,8 @@ class SQLighter:
                 i += 1
             return result
 
-    # Получение описаний к релизам
-    def get_release_long_name(self, active=True, all_releases=False):
+    # Получение русских названий релизов
+    def get_releases_long_names(self, active=True, all_releases=False):
         with self.connection:
             additional_info = ''
             if active:
@@ -42,6 +42,11 @@ class SQLighter:
             if all_releases:
                 additional_info = ''
             return self.cursor.execute("SELECT release_long_name FROM releases{}".format(additional_info)).fetchall()
+
+    # Получение русского названий релиза по его ИД
+    def get_release_long_name_by_id(self, release_id):
+        with self.connection:
+            return self.cursor.execute("SELECT release_long_name FROM releases WHERE release_id={}".format(release_id)).fetchall()
 
     # Добавление нового релиза в БД
     def add_release(self, release_id, release_short_name, release_long_name, site_id="NULL"):
