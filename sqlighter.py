@@ -103,7 +103,7 @@ class SQLighter:
     # Установка релиза неактивным
     def set_not_active_release(self, release_id):
         with self.connection:
-            return ""
+            self.cursor.execute("UPDATE releases SET active = FALSE WHERE release_id = '{}';".format(release_id)).fetchall()
 
     # Закрытие подключения к БД
     def close(self):

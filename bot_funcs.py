@@ -168,8 +168,12 @@ def ep_completed(db, release_id):
                 status_from_db[2] = str(episode + 1)
             # Иначе закрываем релиз в целом
             else:
-                # TODO: Не реализовано!
-                SQLighter.set_not_active_release(db, release_id)
+                # Проверяем статус, если уже закрыт - ничего не делаем, если активен - закрываем.
+                if (str(SQLighter.get_active_status(db, release_id)[0]).replace("(", "").replace(")", "").replace(",", "").strip() == "1"):
+                    SQLighter.set_not_active_release(db, release_id)
+                    return "Работа над {} серией завершена!\n\nРелиз завершён!\nВсем спасибо за работу, увидимся на других релизах!\n\n".format(episode)
+                else:
+                    return "Работа над серией и релизом завершена ранее.\nСтатус последней серии:\n\n".format(episode)
         else:
             status_from_db[2] = str(episode + 1)
         # Вычитаем из текущей даты дедлайн. Если уложились - текущий день будет отрицательным или нулевым, иначе есть задержка и будет меньше времени до следующего дедлайна
@@ -180,7 +184,7 @@ def ep_completed(db, release_id):
         status_from_db[8] = step_change_day(status_from_db[8], clear=True, days=status_from_db[4])
         status_from_db[9] = step_change_day(status_from_db[9], clear=True, days=status_from_db[4])
         status_from_db[10] = step_change_day(status_from_db[10], clear=True, days=status_from_db[4])
-        message = "Работа над {} серией завершена!\n\n".format(status_from_db[2])
+        message = "Работа над {} серией завершена!\n\n".format(episode)
         try:
             SQLighter.edit_episodes_info(db, release_id, status_from_db)
         except:
