@@ -46,6 +46,16 @@ def check_release_available(db, release_id):
         available = False
     return available
 
+# Проверка параметров для запуска релиза
+def check_params(parameters):
+    valid = True
+    for parameter in parameters:
+        try:
+            i = int(parameter)
+        except:
+            valid = False
+    return valid
+
 # Выполняется в 00:00, увеличиваем текущий день в статусе
 def increase_day(db, release_id):
     if (check_release_available(db, release_id)):

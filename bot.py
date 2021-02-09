@@ -86,8 +86,11 @@ async def start_release(message: types.Message):
             parameters[0] = f.set_release_type(parameters[0].lower())
             # Принимаем от 1 до 4 параметров.
             if (parameters[0] > 0 and len(parameters) < 5):
-                SQLighter.add_episodes_info(db, message.chat.id, parameters)
-                await message.answer("Релиз запущен в работу. Текущее состояние релиза можно узнать командой /status.")
+                if (f.check_params(parameters)):
+                    SQLighter.add_episodes_info(db, message.chat.id, parameters)
+                    await message.answer("Релиз запущен в работу. Текущее состояние релиза можно узнать командой /status.")
+                else:
+                    await message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help в личных сообщениях.")
             else:
                 await message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help в личных сообщениях.")
         else:
