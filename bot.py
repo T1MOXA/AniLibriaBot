@@ -41,8 +41,8 @@ async def help(message: types.Message):
         await message.answer("Справка работает только в личных сообщениях.")
 
 # Создание нового релиза.
-@dp.message_handler(commands=["new_release"])
-async def new_release(message: types.Message):
+@dp.message_handler(commands=["new"])
+async def new(message: types.Message):
     # message.chat.id < 0 (отрицательный ID) в том случае, если сообщение пришло из чата. Если больше нуля - это ЛС.
     if (int(message.chat.id) < 0):
         activeReleases = SQLighter.get_all_releases(db)
@@ -52,7 +52,7 @@ async def new_release(message: types.Message):
         if (releaseName != None):
             await message.answer("Для этого чата релиза уже создан релиз \"{}\".".format(releaseName))
         else:
-            parameters = message.text.replace("/new_release", '').replace("@AL_RM_Bot", "").strip().split(" ")
+            parameters = message.text.replace("/new", '').replace("@AL_RM_Bot", "").strip().split(" ")
             # Принимаем не менее 2-х параметров (первый - короткое название релиза, остальные - полное название).
             if (len(parameters) >= 2):
                 i = 2
@@ -73,15 +73,15 @@ async def new_release(message: types.Message):
         await message.answer("Для создания нового релиза добавьте бота в чат релиза и вызовите эту команду там.")
 
 # Запуск релиза в работу.
-@dp.message_handler(commands=["start_release"])
-async def start_release(message: types.Message):
+@dp.message_handler(commands=["rls_str"])
+async def rls_str(message: types.Message):
     if (int(message.chat.id) < 0):
         activeReleases = SQLighter.get_all_releases(db)
         releaseToken = str(message.chat.id)
         releaseName = f.get_key_by_value(activeReleases, releaseToken)
         # releaseName = None - если не удалось найти имя уже созданного релиза.
         if (releaseName != None):
-            parameters = message.text.replace("/start_release", '').replace("@AL_RM_Bot", "").strip().split(" ")
+            parameters = message.text.replace("/rls_str", '').replace("@AL_RM_Bot", "").strip().split(" ")
             # Нулевой параметр - тип релиза (топ, нетоп, неонгоинг). Регистр не важен, тут его приводим к нижнему.
             parameters[0] = f.set_release_type(parameters[0].lower())
             # Принимаем от 1 до 4 параметров.
@@ -94,7 +94,7 @@ async def start_release(message: types.Message):
             else:
                 await message.answer("Неверно введены параметры для старта релиза. Для справки наберите команду /help в личных сообщениях.")
         else:
-            await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new_release [Release_short_name] [Release_long_name]. Для справки наберите команду /help в личных сообщениях.")
+            await message.answer("Для этого чата не создано ни одного релиза. Создайте релиз командой /new [Release_short_name] [Release_long_name]. Для справки наберите команду /help в личных сообщениях.")
     else:
         await message.answer("Для старта релиза добавьте бота в чат релиза и вызовите эту команду там.")
 

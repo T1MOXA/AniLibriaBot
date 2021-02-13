@@ -212,8 +212,8 @@ def ep_completed(db, release_id):
 def get_help():
     header_info = "Менеджер релизов - бот, предназначенный для контроля за работой над релизами. Он способен сообщать ответственным за релиз, что происходит задержка.\n"
     additional_info = "При добавлении бота в группу он будет ежедневно в 20:00 по МСК отправлять статусные сообщения по релизу. Последние сообщения бота можно найти по хештегу #Status."
-    command_new_release = "/new_release [Release_short_name]* [Release_long_name]* - Создание нового релиза. Можно вызвать только в группе релиза после добавления туда бота. \nПараметры:\n• Короткое название релиза (только на английском языке без пробелов, знак подчёркивания использовать можно).\n• Длинное название релиза (можно указывать любое название, желательно на русском).\n\n"
-    command_start_release = "/start_release [Release_type]* [Today] [Current_ep] [Max_ep] - Команда для начала работы над релизом. Можно вызвать только в группе релиза.\nПараметры:\n• Тип релиза* (Top, NonTop, Old).\n• Текущий день релиза (по умолчанию - 1-й день релиза).\n• Текущий эпизод (если бот был добавлен не сразу)\n• Всего эпизодов (если известно).\n\n"
+    command_new = "/new [Release_short_name]* [Release_long_name]* - Создание нового релиза. Можно вызвать только в группе релиза после добавления туда бота. \nПараметры:\n• Короткое название релиза (только на английском языке без пробелов, знак подчёркивания использовать можно).\n• Длинное название релиза (можно указывать любое название, желательно на русском).\n\n"
+    command_rls_str = "/rls_str [Release_type]* [Today] [Current_ep] [Max_ep] - Команда для начала работы над релизом. Можно вызвать только в группе релиза.\nПараметры:\n• Тип релиза* (Top, NonTop, Old).\n• Текущий день релиза (по умолчанию - 1-й день релиза).\n• Текущий эпизод (если бот был добавлен не сразу)\n• Всего эпизодов (если известно).\n\n"
     command_subs_completed = "/subs_completed - Отметка о завершении работ над переводом.\n\n"
     command_decor_completed = "/decor_completed - Отметка о завершении работ над оформлением.\n\n"
     command_voice_completed = "/voice_completed - Отметка о завершении работ над озвучкой.\n\n"
@@ -224,7 +224,7 @@ def get_help():
     command_active_releases = "/active_releases - Вызов списка активных релизов, над которыми идёт работа в данный момент.\n\n"
     command_releases_history = "/releases_history - Вызов списка архивных (неактивных) релизов, используется исключительно для справки.\n\n"
     
-    commands = (command_new_release + command_start_release + command_subs_completed + command_decor_completed + 
+    commands = (command_new + command_rls_str + command_subs_completed + command_decor_completed + 
         command_voice_completed + command_timing_completed + command_fixs_completed + command_ep_completed + command_status + 
         command_active_releases + command_releases_history)
 
