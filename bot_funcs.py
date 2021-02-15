@@ -103,8 +103,8 @@ def get_status(db, release_id):
             status = "Завершён."
         else:
             status = "Активен."
-        head = str.format("Статус релиза: {}\n\nСерия {} из {}. День {} из {}:\n", status, episode, max_episode, today, deadline)
-        status_tag = "\n#Status"
+        head = str.format("____________________\nСтатус релиза: {}\n\nСерия {} из {}. День {} из {}:\n", status, episode, max_episode, today, deadline)
+        status_tag = "\n#Status\n____________________"
         status = head + "\n" + subs + decor + voice + timing + fixs + status_tag
 
         return str(status)
@@ -161,7 +161,7 @@ def step_completing(db, release_id, step):
         if step_info[0]=="0":
             step_info[0] = "1"
         status_from_db[step_list[step]] = "{}|{}|{}".format(step_info[0], step_info[1], step_info[2])
-        message = "Статус серии обновлён на сервере. Текущее состояние релиза можно узнать командой /status."
+        message = "Статус серии обновлён на сервере.\n\nТекущее состояние релиза:"
         try:
             SQLighter.edit_episodes_info(db, release_id, status_from_db)
         except:
@@ -188,7 +188,7 @@ def ep_completed(db, release_id):
                     SQLighter.set_not_active_release(db, release_id)
                     return "Работа над {} серией завершена!\n\nРелиз завершён!\nВсем спасибо за работу, увидимся на других релизах!\n\n".format(episode)
                 else:
-                    return "Работа над серией и релизом завершена ранее.\nСтатус последней серии:\n\n".format(episode)
+                    return "Работа над серией и релизом завершена ранее.\nСтатус последней серии:\n".format(episode)
         else:
             status_from_db[2] = str(episode + 1)
         # Вычитаем из текущей даты дедлайн. Если уложились - текущий день будет отрицательным или нулевым, иначе есть задержка и будет меньше времени до следующего дедлайна
@@ -200,6 +200,13 @@ def ep_completed(db, release_id):
         status_from_db[9] = step_change_day(status_from_db[9], clear=True, days=status_from_db[4])
         status_from_db[10] = step_change_day(status_from_db[10], clear=True, days=status_from_db[4])
         message = "Работа над {} серией завершена!\n\n".format(episode)
+        # Проверка, что завершены все этапы работы
+        if (not check_step_completed(db, release_id, 's') or 
+            not check_step_completed(db, release_id, 'd') or 
+            not check_step_completed(db, release_id, 'v') or
+            not check_step_completed(db, release_id, 't') or
+            not check_step_completed(db, release_id, 'f')):
+            message += "Внимание, завершены не все этапы релиза! Если команда была вызвана по ошибке - свяжитесь с администратором бота.\n\n"
         try:
             SQLighter.edit_episodes_info(db, release_id, status_from_db)
         except:

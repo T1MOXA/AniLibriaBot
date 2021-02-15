@@ -104,7 +104,7 @@ async def subs_completed(message: types.Message):
     if (int(message.chat.id) < 0):
         if (not f.check_step_completed(db, message.chat.id, 's')):
             answer = "Работа над субтитрами завершена.\n"
-            answer += f.step_completing(db, message.chat.id, 's')
+            answer += f.step_completing(db, message.chat.id, 's') + "\n\n" + str(f.get_status(db, message.chat.id))
         else:
             answer = "Работа над субтитрами завершена ранее. Текущее состояние релиза можно узнать командой /status."
         await message.answer(answer)
@@ -116,7 +116,7 @@ async def decor_completed(message: types.Message):
     if (int(message.chat.id) < 0):
         if (not f.check_step_completed(db, message.chat.id, 'd')):
             answer = "Работа над оформлением завершена.\n"
-            answer += f.step_completing(db, message.chat.id, 'd')
+            answer += f.step_completing(db, message.chat.id, 'd') + "\n\n" + str(f.get_status(db, message.chat.id))
         else:
             answer = "Работа над оформлением завершена ранее. Текущее состояние релиза можно узнать командой /status."
         await message.answer(answer)
@@ -128,7 +128,7 @@ async def voice_completed(message: types.Message):
     if (int(message.chat.id) < 0):
         if (not f.check_step_completed(db, message.chat.id, 'v')):
             answer = "Работа над озвучкой завершена.\n"
-            answer += f.step_completing(db, message.chat.id, 'v')
+            answer += f.step_completing(db, message.chat.id, 'v') + "\n\n" + str(f.get_status(db, message.chat.id))
         else:
             answer = "Работа над озвучкой завершена ранее. Текущее состояние релиза можно узнать командой /status."
         await message.answer(answer)
@@ -140,7 +140,7 @@ async def timing_completed(message: types.Message):
     if (int(message.chat.id) < 0):
         if (not f.check_step_completed(db, message.chat.id, 't')):
             answer = "Работа над таймингом завершена.\n"
-            answer += f.step_completing(db, message.chat.id, 't')
+            answer += f.step_completing(db, message.chat.id, 't') + "\n\n" + str(f.get_status(db, message.chat.id))
         else:
             answer = "Работа над таймингом завершена ранее. Текущее состояние релиза можно узнать командой /status."
         await message.answer(answer)
@@ -152,7 +152,7 @@ async def fixs_completed(message: types.Message):
     if (int(message.chat.id) < 0):
         if (not f.check_step_completed(db, message.chat.id, 'f')):
             answer = "Работа над фиксами завершена.\n"
-            answer += f.step_completing(db, message.chat.id, 'f')
+            answer += f.step_completing(db, message.chat.id, 'f') + "\n\n" + str(f.get_status(db, message.chat.id))
         else:
             answer = "Работа над фиксами завершена ранее. Текущее состояние релиза можно узнать командой /status."
         await message.answer(answer)
@@ -163,17 +163,9 @@ async def fixs_completed(message: types.Message):
 @dp.message_handler(commands=["ep_completed"])
 async def ep_completed(message: types.Message):
     if (int(message.chat.id) < 0):
-        # Проверка, что завершены все этапы работы
-        if (f.check_step_completed(db, message.chat.id, 's') and 
-            f.check_step_completed(db, message.chat.id, 'd') and 
-            f.check_step_completed(db, message.chat.id, 'v') and
-            f.check_step_completed(db, message.chat.id, 't') and
-            f.check_step_completed(db, message.chat.id, 'f')):
-            releaseStatus = f.get_status(db, message.chat.id)
-            ep_completed_title = f.ep_completed(db, message.chat.id)
-            await message.answer(str(ep_completed_title) + str(releaseStatus))
-        else:
-            await message.answer("Завершены не все этапы работы над серией.\nТекущее состояние релиза можно узнать командой /status.")
+        releaseStatus = f.get_status(db, message.chat.id)
+        ep_completed_title = f.ep_completed(db, message.chat.id)
+        await message.answer(str(ep_completed_title) + str(releaseStatus))
     else:
         await message.answer("Данная команда работает только в чате релиза.")
 
