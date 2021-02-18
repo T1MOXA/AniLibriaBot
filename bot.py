@@ -240,7 +240,9 @@ async def scheduler(wait_for):
             for Release in activeReleases:
                 releaseStatus = f.get_status(db, activeReleases[Release])
                 releaseLongName = f.get_long_name(db, activeReleases[Release])
-                await bot.send_message(activeReleases[Release], releaseLongName + "\n\n" + releaseStatus, disable_notification=True)
+                today = int(str(SQLighter.get_status(db, activeReleases[Release])[0]).replace("(", "").replace(")", "").split(", ")[4])
+                if (today > 0):
+                    await bot.send_message(activeReleases[Release], releaseLongName + "\n\n" + releaseStatus, disable_notification=True)
         if (now == "00:00:00"):
             activeReleases = SQLighter.get_all_releases(db)
             for Release in activeReleases:

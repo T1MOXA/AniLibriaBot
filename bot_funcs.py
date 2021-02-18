@@ -107,7 +107,10 @@ def get_status(db, release_id):
         status_tag = "\n#Status\n____________________"
         status = head + "\n" + subs + decor + voice + timing + fixs + status_tag
 
-        return str(status)
+        if (int(today) > 0):
+            return str(status)
+        else:
+            return str.format("Новая серия ещё не вышла. Дней до выхода новой серии: {}.", -int(today))
     else:
         return "Релиз не найден."
 
